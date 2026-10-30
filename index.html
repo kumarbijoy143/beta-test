@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Project proposal: sports turf, café, billiards and gaming facility at Bazaltoli Gaon, Tinsukia, Assam">
+<title>Bazaltoli Turf &amp; Café Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#F4F6F2; --surface:#FFFFFF; --ink:#16211B; --muted:#5B6A61; --line:#D8E0D9;
+  --accent:#1E6E47; --accent-soft:#E2EFE6; --warn:#9A5B12; --warn-soft:#FBEFD9;
+  --good:#1E6E47; --bad:#A33A2C;
+  --sky:#DCE7EE; --ground:#C9D3C2;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111814; --surface:#18221C; --ink:#E7EEE9; --muted:#9AAAA0; --line:#2B3830;
+  --accent:#5CC08B; --accent-soft:#1D3327; --warn:#E3A857; --warn-soft:#33281A;
+  --good:#5CC08B; --bad:#E58373; --sky:#1B2630; --ground:#26302A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111814; --surface:#18221C; --ink:#E7EEE9; --muted:#9AAAA0; --line:#2B3830;
+  --accent:#5CC08B; --accent-soft:#1D3327; --warn:#E3A857; --warn-soft:#33281A;
+  --good:#5CC08B; --bad:#E58373; --sky:#1B2630; --ground:#26302A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px;display:flex;flex-direction:column;gap:36px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:.01em}
+h2{font-size:26px;font-weight:600;margin-bottom:12px}
+h3{font-size:19px;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.lede{color:var(--muted);max-width:68ch;margin-top:8px}
+header{display:flex;flex-direction:column;gap:6px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 11px;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+.viewer{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stage{position:relative;height:min(64vh,580px);min-height:360px;background:var(--sky)}
+.stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.tag{position:absolute;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);font:700 13px/24px var(--f-body);text-align:center;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.views{position:absolute;left:12px;top:12px;right:12px;display:flex;flex-wrap:wrap;gap:6px}
+.views button{font:600 13px var(--f-body);padding:6px 11px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.views button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.views .sep{width:1px;background:var(--line);margin:2px 2px}
+.views button:focus-visible,.inp input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:4px;opacity:.9}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px 20px;padding:16px 18px;border-top:1px solid var(--line)}
+.legend div{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.legend span.n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font-weight:700;font-size:12px;text-align:center;line-height:20px}
+.legend small{color:var(--muted);display:block}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;background:var(--bg)}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr.grp td{background:var(--accent-soft);font-weight:700;font-family:var(--f-display);font-size:16px;letter-spacing:.02em}
+tr.sub td{font-weight:700}
+tr.total td{font-weight:700;font-size:16px;border-top:2px solid var(--ink)}
+td small{color:var(--muted);display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi .l{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.kpi .v{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:13px;color:var(--muted)}
+.v.good{color:var(--good)} .v.bad{color:var(--bad)}
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.inp{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+.inp input{font:600 15px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;font-variant-numeric:tabular-nums}
+.inputs h3{grid-column:1/-1;font-size:16px;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.two > *{min-width:0}
+.note{font-size:14px;color:var(--muted);max-width:75ch}
+.callout{background:var(--warn-soft);border-left:4px solid var(--warn);padding:12px 16px;border-radius:0 8px 8px 0;font-size:14px}
+.callout b{color:var(--ink)}
+ul.check{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+#setBtn{position:fixed;top:max(12px,env(safe-area-inset-top,0px));right:12px;z-index:30;font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);z-index:40;background:var(--surface);border-left:1px solid var(--line);box-shadow:-6px 0 24px rgba(0,0,0,.25);display:flex;flex-direction:column;transform:translateX(105%);visibility:hidden;transition:transform .2s,visibility .2s;padding-top:env(safe-area-inset-top,0px)}
+#drawer.open{transform:none;visibility:visible}
+#dh{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+#tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--line)}
+#tabs button{flex:none}
+#panes{overflow-y:auto;padding:14px;flex:1;padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+.pane{display:none;flex-direction:column;gap:10px}.pane.on{display:flex}
+.pane .inputs{border:0;padding:0;background:none;grid-template-columns:1fr;margin:0!important}
+#drawer input,#drawer select,#drawer textarea{font:600 14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+#drawer input[type=checkbox]{width:auto}#drawer input[type=color]{padding:2px;height:34px}
+#drawer button{font:600 13px var(--f-body);padding:6px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+#tabs button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.cg{display:grid;grid-template-columns:1fr 120px 34px;gap:4px;margin-top:12px}
+.ci{display:grid;grid-template-columns:1fr 34px;gap:4px;padding-left:10px}
+.ci>:nth-child(5){grid-column:1/-1}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow" id="tEy">Project proposal · for term-loan appraisal</div>
+  <h1 id="tH">Bazaltoli Turf &amp; Café</h1>
+  <p class="lede" id="tLede">A floodlit 5/7-a-side football and box-cricket turf, a café with outdoor seating, a billiards and gaming hall, washrooms with changing rooms, and parking, planned on a 14,599.61 sq ft plot at Bazaltoli Gaon, Tinsukia.</p>
+  <div class="meta">
+    <span class="chip">Dag No. <b>450 &amp; 148</b> · Periodic Patta <b>21</b></span>
+    <span class="chip">Mauza <b>Rangagora</b>, Tinsukia</span>
+    <span class="chip">Plot <b>14,599.61 sq ft</b> (1B-0K-1.39L)</span>
+    <span class="chip">Access <b>20 ft road from the lane</b></span>
+  </div>
+</header>
+
+<section class="viewer" aria-label="3D site layout">
+  <div class="stage" id="stage">
+    <div class="views" role="group" aria-label="3D view controls">
+      <button type="button" data-v="aerial" aria-pressed="true">Aerial</button>
+      <button type="button" data-v="entry" aria-pressed="false">From entrance</button>
+      <button type="button" data-v="seat" aria-pressed="false">From seating area</button>
+      <button type="button" data-v="plan" aria-pressed="false">Top plan</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" id="roofBtn" aria-pressed="false">Show interiors</button>
+    </div>
+    <div class="hint">Drag to rotate · scroll or pinch to zoom</div>
+  </div>
+  <div class="legend" id="legend"></div>
+</section>
+
+<section>
+  <h2>Site &amp; area statement</h2>
+  <div class="two">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Boundary</th><th class="num">Length</th><th>Adjoining</th></tr></thead>
+      <tbody>
+        <tr><td>North</td><td class="num">133′-5″</td><td>Part of Dag 146 &amp; 147</td></tr>
+        <tr><td>South</td><td class="num">150′-5″</td><td>Land of Dag 450</td></tr>
+        <tr><td>East</td><td class="num">102′-2″</td><td>20 ft wide proposed road, joining the lane (entry)</td></tr>
+        <tr><td>West</td><td class="num">103′-7″</td><td>Land of Dag 143</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Component</th><th class="num">Size</th><th class="num">Area (sq ft)</th><th class="num">% plot</th></tr></thead>
+      <tbody id="areaBody"></tbody>
+    </table></div>
+  </div>
+  <p class="note" style="margin-top:10px">Layout follows the owner's arrangement sketch and is drawn to approximate scale from the approved sketch map. Final setbacks, ground coverage and FAR must follow Tinsukia Development Authority building bye-laws; an architect should prepare the sanction drawings.</p>
+</section>
+
+<section>
+  <h2>Project cost estimate</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Item</th><th>Basis</th><th class="num">Amount (₹ lakh)</th></tr></thead>
+    <tbody id="costBody"></tbody>
+  </table></div>
+  <p class="note" style="margin-top:10px">Rates are indicative for upper Assam in late 2026. Turnkey turf packages are benchmarked against Indian vendor listings for box-cricket setups (about ₹140–250 per sq ft for turf, netting and lighting), with extra allowed for base drainage in a high-rainfall site and freight to Tinsukia. The bank will ask for supplier quotations against each line before sanction. Land is the promoter's own and is not included in project cost.</p>
+</section>
+
+<section>
+  <h2>Means of finance &amp; viability</h2>
+  <div class="kpis" id="kpis"></div>
+  <p class="note" style="margin-top:10px">Change loan, revenue and running-cost assumptions in ⚙ Settings.</p>
+  <div class="inputs" style="margin-top:16px">
+    <h3>Loan terms</h3>
+    <label class="inp">Bank loan (% of project cost)<input id="loanPct" type="number" value="75" min="0" max="90" step="1"></label>
+    <label class="inp">Interest rate (% p.a.)<input id="rate" type="number" value="10.5" step="0.25"></label>
+    <label class="inp">Tenure incl. moratorium (years)<input id="tenure" type="number" value="7" min="3" max="10" step="1"></label>
+    <label class="inp">Moratorium (months)<input id="mor" type="number" value="6" min="0" max="18" step="1"></label>
+  </div>
+  <div class="inputs" style="margin-top:12px">
+    <h3>Revenue at steady state (year 3)</h3>
+    <label class="inp">Turf rate, blended (₹/hour)<input id="turfRate" type="number" value="1000" step="50"></label>
+    <label class="inp">Turf hours booked per day<input id="turfHrs" type="number" value="8" step="0.5"></label>
+    <label class="inp">Café sales per day (₹)<input id="cafe" type="number" value="7000" step="500"></label>
+    <label class="inp">Billiards &amp; gaming per day (₹)<input id="games" type="number" value="3000" step="250"></label>
+    <label class="inp">Tournaments, events, memberships (₹ lakh/yr)<input id="events" type="number" value="3" step="0.5"></label>
+    <label class="inp">Operating days per year<input id="days" type="number" value="340" step="5"></label>
+  </div>
+  <div class="inputs" style="margin-top:12px">
+    <h3>Operating costs</h3>
+    <label class="inp">Staff salaries (₹/month)<input id="staff" type="number" value="105000" step="5000"></label>
+    <label class="inp">Electricity (₹/month)<input id="power" type="number" value="40000" step="2500"></label>
+    <label class="inp">Café food cost (% of café sales)<input id="food" type="number" value="40" step="1"></label>
+    <label class="inp">Other fixed costs (₹ lakh/yr)<input id="otherFixed" type="number" value="4.8" step="0.1"></label>
+  </div>
+  <p class="note" style="margin-top:10px">Billiards and gaming income assumes 2 pool tables at about ₹200 per table-hour for 5 hours a day, plus console and table-game sales. Staff assumed: manager, 2 ground attendants, games-hall attendant, cook, 2 café helpers, security guard. Other fixed costs cover DG fuel, turf grooming and infill top-up, marketing, insurance, booking software and admin. Repairs are taken at 1.5% of capital cost. Year 1 runs at 75% of steady-state revenue and year 2 at 90%; revenue and costs rise 5% a year from year 4. Tax is taken at a flat 25% of profit for illustration.</p>
+</section>
+
+<section>
+  <h2>Projected profitability &amp; debt service (₹ lakh)</h2>
+  <div class="tbl-wrap"><table id="projTbl"></table></div>
+</section>
+
+<section>
+  <h2>Before you meet the bank</h2>
+  <div class="callout"><b>The sketch map's NOC was issued for land sale and was valid only up to 6.7.2014.</b> For a commercial building on this plot you will need fresh approvals in the borrower's name. The land is recorded under a periodic patta, so confirm with the Circle Office whether conversion from agricultural to commercial use is required before TDA will sanction a building plan.</div>
+  <div class="two" style="margin-top:16px">
+    <div>
+      <h3 style="margin-bottom:8px">Land &amp; approvals</h3>
+      <ul class="check">
+        <li>Registered sale deed and mutation (jamabandi copy) in the borrower's name</li>
+        <li>Land revenue paid-up receipt and non-encumbrance certificate</li>
+        <li>Land-use conversion order, if required for the patta</li>
+        <li>TDA building permission with approved drawings</li>
+        <li>Trade licence, FSSAI licence for the café, fire NOC, APDCL load sanction</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-bottom:8px">Business documents</h3>
+      <ul class="check">
+        <li>Udyam registration, PAN and GST registration of the business</li>
+        <li>Supplier quotations for turf, netting, floodlights, kitchen, pool tables and gaming equipment</li>
+        <li>Civil estimate signed by a registered engineer or architect</li>
+        <li>Detailed Project Report with these projections and a CMA statement</li>
+        <li>Promoter KYC, income tax returns (3 years) and bank statements</li>
+        <li>Ask whether CGTMSE cover can reduce the collateral the bank needs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer id="tFoot">Prepared 29 October 2026 as a preliminary estimate. All costs and revenues are indicative and should be verified with local quotations and a market survey of turf booking rates in Tinsukia before final submission.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const COST = [
+ {g:"A. Site development", items:[
+  ["Site clearing, earth filling (avg 2 ft) & compaction","~29,000 cft over plot",5.50],
+  ["Boundary wall, 6 ft brick with plaster","~470 rft @ ₹1,900",8.93],
+  ["Main MS sliding gate + wicket gate","20 ft opening",1.20],
+  ["Storm-water drains & soak pits","Perimeter + turf outfall",1.80]]},
+ {g:"B. Football / box-cricket turf (100 × 60 ft)", items:[
+  ["Base: excavation, GSB, WMM, sub-surface drainage, kerb","6,000 sq ft @ ₹90",5.40],
+  ["Artificial grass 50 mm with sand & rubber infill, laid","6,000 sq ft @ ₹90",5.40],
+  ["MS/GI pole structure, side & top netting (32 ft)","Full enclosure",6.00],
+  ["LED floodlights, 12 × 200 W, with wiring","6 poles",2.40],
+  ["Goal posts, stumps, cricket pitch mat, balls","Set",0.80],
+  ["Cricket bowling machine","1 unit",1.50]]},
+ {g:"C. Buildings", items:[
+  ["Café with kitchen, RCC frame, glass front","36 × 18 ft = 648 sq ft @ ₹2,200",14.26],
+  ["Billiards & gaming hall, RCC frame, glass front","60 × 15 ft = 900 sq ft @ ₹2,000",18.00],
+  ["Washrooms & changing rooms block","20 × 15 ft = 300 sq ft @ ₹2,000",6.00]]},
+ {g:"D. Furniture & equipment", items:[
+  ["Commercial kitchen equipment (SS)","Range, fridge, fryer, exhaust",5.00],
+  ["Café counter, furniture & interiors","~20 indoor + 32 outdoor covers",3.50],
+  ["Pool tables, 7 ft slate, with cues, racks & lamps","2 tables @ ₹1.5 lakh",3.00],
+  ["Gaming: 2 console stations with TVs, air hockey, foosball, carrom","Set",2.85],
+  ["Games-hall interiors: AC (2 × 2 TR), flooring, lighting, seating","Lump sum",2.50],
+  ["Lockers, benches & fixtures for changing rooms","Set",0.80]]},
+ {g:"E. Utilities & systems", items:[
+  ["APDCL LT connection, panel, cabling, earthing","~40 kW load",4.00],
+  ["Silent DG set, 25 kVA","Backup for lights & café",4.20],
+  ["Borewell, pump, overhead tank, plumbing","Set",1.80],
+  ["Septic tank","Per design",1.40],
+  ["CCTV, Wi-Fi, sound system, POS & online booking","Set",2.20]]},
+ {g:"F. External works", items:[
+  ["Interlocking paver parking, entry plaza & walkways","~3,900 sq ft @ ₹110",4.29],
+  ["Outdoor seating deck, umbrellas, landscaping, signage","Lump sum",3.00]]},
+ {g:"G. Pre-operative expenses", items:[
+  ["Architect, structural design, approvals, licences, DPR","Lump sum",3.00],
+  ["Launch marketing","Lump sum",1.00]]}
+];
+let CONT_PCT = 5, WC = 3.0;
+const $ = id => document.getElementById(id);
+const f2 = v => v.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+const KR={"Boundary wall, 6 ft brick with plaster":["wall",1900],"Base: excavation, GSB, WMM, sub-surface drainage, kerb":["turf",90],"Artificial grass 50 mm with sand & rubber infill, laid":["turf",90],"Café with kitchen, RCC frame, glass front":["cafe",2200],"Billiards & gaming hall, RCC frame, glass front":["hall",2000],"Washrooms & changing rooms block":["wash",2000],"Interlocking paver parking, entry plaza & walkways":["paver",110]};
+COST.forEach(G=>{G.t=G.g[0]==="G"?"G":"ACF".includes(G.g[0])?"A":"D"; G.items.forEach(it=>{const k=KR[it[0]]; it[3]=k?k[0]:""; it[4]=k?k[1]:0;});});
+const IDS=["loanPct","rate","tenure","mor","turfRate","turfHrs","cafe","games","events","days","staff","power","food","otherFixed"];
+const CFG0={tl:100,tw:60,cw:36,cd:18,hw:60,hd:15,ww:20,wd:15,nh:32,cars:6,umb:8,trees:1,park:3900,deck:828,wall:470,plot:14599.61,turfCol:"#2f8a4c",cafeCol:"#3c5a6e",hallCol:"#4a5560",leg:null,
+ tH:$("tH").textContent,tEy:$("tEy").textContent,tLede:$("tLede").textContent,tFoot:$("tFoot").textContent};
+let CFG=Object.assign({},CFG0);
+const U={turf:"sq ft",cafe:"sq ft",hall:"sq ft",wash:"sq ft",paver:"sq ft",wall:"rft"};
+const Q=()=>({turf:CFG.tl*CFG.tw,cafe:CFG.cw*CFG.cd,hall:CFG.hw*CFG.hd,wash:CFG.ww*CFG.wd,paver:CFG.park,wall:CFG.wall});
+const amt=it=>it[3]?Q()[it[3]]*it[4]/1e5:it[2];
+const bas=it=>it[3]?Math.round(Q()[it[3]]).toLocaleString("en-IN")+" "+U[it[3]]+" @ ₹"+it[4].toLocaleString("en-IN"):it[1];
+const KEY="bazaltoli-turf-settings-v1";
+function save(){try{localStorage.setItem(KEY,JSON.stringify({CFG,COST,CONT_PCT,WC,inp:Object.fromEntries(IDS.map(i=>[i,$(i).value]))}))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(!s)return;Object.assign(CFG,s.CFG);if(Array.isArray(s.COST)){COST.length=0;s.COST.forEach(g=>COST.push(g));}CONT_PCT=s.CONT_PCT;WC=s.WC;IDS.forEach(i=>{if(s.inp&&s.inp[i]!=null)$(i).value=s.inp[i]});}catch(e){}}
+function applyText(){$("tH").textContent=CFG.tH;document.title=CFG.tH;$("tEy").textContent=CFG.tEy;$("tLede").textContent=CFG.tLede;$("tFoot").textContent=CFG.tFoot;}
+load();
+
+function costTotals(){
+  let byGroup = {}, hard = 0, preop = 0, civil = 0, equip = 0;
+  COST.forEach(G=>{
+    const s = G.items.reduce((a,it)=>a+amt(it),0);
+    byGroup[G.g] = s;
+    const k = G.t;
+    if(k==="G") preop += s; else { hard += s; if(k==="A") civil += s; else equip += s; }
+  });
+  const cont = hard*CONT_PCT/100;
+  const total = hard + preop + cont + WC;
+  return {byGroup, hard, preop, cont, total, civil:civil+cont*civil/hard, equip:equip+cont*equip/hard+preop};
+}
+
+function renderCost(){
+  const t = costTotals();
+  let h = "";
+  COST.forEach(G=>{
+    h += `<tr class="grp"><td colspan="2">${G.g}</td><td class="num">${f2(t.byGroup[G.g])}</td></tr>`;
+    G.items.forEach(it=>{ h += `<tr><td>${it[0]}</td><td>${bas(it)}</td><td class="num">${f2(amt(it))}</td></tr>`; });
+  });
+  h += `<tr class="sub"><td colspan="2">Contingency (${CONT_PCT}% of A–F)</td><td class="num">${f2(t.cont)}</td></tr>`;
+  h += `<tr class="sub"><td colspan="2">Margin money for working capital</td><td class="num">${f2(WC)}</td></tr>`;
+  h += `<tr class="total"><td colspan="2">Total project cost</td><td class="num">${f2(t.total)}</td></tr>`;
+  $("costBody").innerHTML = h;
+  return t;
+}
+
+function num(id){ const v = parseFloat($(id).value); return isFinite(v)?v:0; }
+
+function model(){
+  const ct = renderCost();
+  const P = ct.total*num("loanPct")/100, equity = ct.total - P;
+  const r = num("rate")/1200, n = Math.max(12,Math.round(num("tenure")*12)), m = Math.min(Math.round(num("mor")), n-1);
+  const emi = r>0 ? P*r/(1-Math.pow(1+r,-(n-m))) : P/(n-m);
+  const YEARS = Math.max(10, Math.ceil(n/12));
+  const yI = Array(YEARS).fill(0), yP = Array(YEARS).fill(0);
+  let bal = P;
+  for(let k=1;k<=n;k++){
+    const y = Math.floor((k-1)/12), int = bal*r;
+    if(k<=m){ yI[y]+=int; } else { const pr = Math.min(emi-int,bal); yI[y]+=int; yP[y]+=pr; bal-=pr; }
+  }
+  const days = num("days");
+  const steady = {
+    turf: num("turfRate")*num("turfHrs")*days/1e5,
+    cafe: num("cafe")*days/1e5,
+    games: num("games")*days/1e5,
+    events: num("events")
+  };
+  const fixedBase = (num("staff")+num("power"))*12/1e5 + num("otherFixed") + 0.015*(ct.total-WC);
+  const foodPct = num("food")/100;
+  const depr = ct.civil/30 + ct.equip/8;
+  const ramp = y => y===0?0.75:(y===1?0.9:1);
+  const esc = y => Math.pow(1.05, Math.max(0,y-2));
+  const rows = [];
+  for(let y=0;y<YEARS;y++){
+    const f = ramp(y)*esc(y);
+    const rev = {turf:steady.turf*f, cafe:steady.cafe*f, games:steady.games*f, events:steady.events*f};
+    const revT = rev.turf+rev.cafe+rev.games+rev.events;
+    const food = rev.cafe*foodPct, fixed = fixedBase*esc(y);
+    const ebitda = revT - food - fixed;
+    const pbt = ebitda - yI[y] - depr;
+    const tax = Math.max(0,pbt)*0.25, pat = pbt - tax;
+    const ds = yI[y]+yP[y];
+    rows.push({rev,revT,food,fixed,ebitda,int:yI[y],depr,pbt,tax,pat,prin:yP[y],ds,dscr: ds>0?(pat+depr+yI[y])/ds:null, cash:pat+depr});
+  }
+  const loanYrs = rows.filter(r=>r.ds>0.01);
+  const avg = loanYrs.length ? loanYrs.reduce((a,r)=>a+r.dscr,0)/loanYrs.length : 0;
+  const min = loanYrs.length ? Math.min(...loanYrs.map(r=>r.dscr)) : 0;
+  let cum=0, pay=null;
+  for(let y=0;y<rows.length;y++){ const c=rows[y].cash; if(cum+c>=ct.total && pay===null){ pay = y + (ct.total-cum)/c; } cum+=c; }
+  const fullDS = emi*12;
+  const otherRev = steady.cafe*(1-foodPct)+steady.games+steady.events;
+  const beHrs = (fullDS + fixedBase - otherRev)*1e5/(Math.max(1,num("turfRate"))*Math.max(1,days));
+  return {ct,P,equity,emi,rows,avg,min,pay,beHrs,loanYrs:loanYrs.length};
+}
+
+function render(){
+  const M = model(), R = M.rows, show = Math.min(R.length, Math.max(7, M.loanYrs));
+  const kpi = (l,v,s,cls="")=>`<div class="kpi"><div class="l">${l}</div><div class="v ${cls}">${v}</div><div class="s">${s}</div></div>`;
+  $("kpis").innerHTML =
+    kpi("Total project cost", "₹"+f2(M.ct.total)+" L", "incl. contingency & working capital") +
+    kpi("Bank term loan", "₹"+f2(M.P)+" L", "EMI ₹"+Math.round(M.emi*1e5).toLocaleString("en-IN")+"/month") +
+    kpi("Promoter's contribution", "₹"+f2(M.equity)+" L", "cash margin, plus land in kind") +
+    kpi("Average DSCR", M.avg.toFixed(2), "minimum "+M.min.toFixed(2)+" · banks look for ≥ 1.25", M.avg>=1.25?"good":"bad") +
+    kpi("Payback period", M.pay?M.pay.toFixed(1)+" yrs":"> "+R.length+" yrs", "from profit + depreciation") +
+    kpi("Break-even turf use", Math.max(0,M.beHrs).toFixed(1)+" h/day", "to cover full EMI, of ~17 h available");
+  const yrs = R.slice(0,show);
+  const line = (label, fn, cls="") => `<tr class="${cls}"><td>${label}</td>${yrs.map(r=>`<td class="num">${fn(r)}</td>`).join("")}</tr>`;
+  let h = `<thead><tr><th>Particulars</th>${yrs.map((_,i)=>`<th class="num">Year ${i+1}</th>`).join("")}</tr></thead><tbody>`;
+  h += line("Turf bookings", r=>f2(r.rev.turf));
+  h += line("Café sales", r=>f2(r.rev.cafe));
+  h += line("Billiards & gaming", r=>f2(r.rev.games));
+  h += line("Events & memberships", r=>f2(r.rev.events));
+  h += line("Total revenue", r=>f2(r.revT), "sub");
+  h += line("Café food cost", r=>f2(r.food));
+  h += line("Staff, power, repairs & other fixed", r=>f2(r.fixed));
+  h += line("Operating profit (EBITDA)", r=>f2(r.ebitda), "sub");
+  h += line("Interest on term loan", r=>f2(r.int));
+  h += line("Depreciation", r=>f2(r.depr));
+  h += line("Profit before tax", r=>f2(r.pbt));
+  h += line("Tax (25%)", r=>f2(r.tax));
+  h += line("Net profit", r=>f2(r.pat), "sub");
+  h += line("Loan principal repaid", r=>f2(r.prin));
+  h += line("DSCR", r=>r.dscr==null?"–":r.dscr.toFixed(2), "total");
+  $("projTbl").innerHTML = h + "</tbody>";
+}
+
+function renderArea(){ const PLOT=CFG.plot;
+  const A = [
+    ["Football / box-cricket turf",CFG.tl+" × "+CFG.tw+" ft",CFG.tl*CFG.tw],
+    ["Café",CFG.cw+" × "+CFG.cd+" ft",CFG.cw*CFG.cd],
+    ["Billiards & gaming hall",CFG.hw+" × "+CFG.hd+" ft",CFG.hw*CFG.hd],
+    ["Washrooms & changing rooms",CFG.ww+" × "+CFG.wd+" ft",CFG.ww*CFG.wd],
+    ["Outdoor seating deck","—",CFG.deck],
+    ["Car parking, entry plaza & walkways","—",CFG.park],
+  ];
+  const bu=CFG.cw*CFG.cd+CFG.hw*CFG.hd+CFG.ww*CFG.wd; const used = A.reduce((a,x)=>a+x[2],0);
+  A.push(["Landscape, boundary wall & setbacks","—",PLOT-used]);
+  let h = A.map(a=>`<tr><td>${a[0]}</td><td class="num">${a[1]}</td><td class="num">${Math.round(a[2]).toLocaleString("en-IN")}</td><td class="num">${(a[2]/PLOT*100).toFixed(1)}</td></tr>`).join("");
+  h += `<tr class="total"><td>Plot area</td><td></td><td class="num">${PLOT.toLocaleString("en-IN")}</td><td class="num">100.0</td></tr>`;
+  h += `<tr><td colspan="4"><small>Built-up area ${Math.round(bu).toLocaleString("en-IN")} sq ft, all ground floor. Ground coverage of buildings ≈ ${(bu/PLOT*100).toFixed(1)}%.</small></td></tr>`;
+  $("areaBody").innerHTML = h;
+}
+
+document.querySelectorAll(".inputs input").forEach(el=>el.addEventListener("input", render));
+render();
+
+const LEG = [
+ ["Football & box-cricket turf","100 × 60 ft along the south side, fully netted, floodlit"],
+ ["Café","Kitchen and counter, glass front facing the turf"],
+ ["Outdoor seating","Deck with umbrella tables beside the turf"],
+ ["Billiards & gaming hall","2 pool tables, console stations, air hockey, foosball"],
+ ["Washrooms & changing rooms","Separate gents and ladies, north-west corner"],
+ ["Car parking","6 cars beside the turf's east end"],
+ ["Entry plaza & ticket counter","Two-wheeler parking and booking kiosk"],
+ ["Main gate","From the 20 ft road that joins the lane (gali)"]
+];
+function renderLegend(){ $("legend").innerHTML = (CFG.leg?CFG.leg.split("\n").filter(Boolean).map(x=>x.split("|")):LEG).map((l,i)=>`<div><span class="n">${i+1}</span><span>${l[0]}<small>${l[1]||""}</small></span></div>`).join(""); }
+
+function showFail(msg){ const s=$("stage"); const d=document.createElement("div"); d.style.cssText="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--muted);font-size:15px"; d.textContent=msg; s.appendChild(d); }
+try{ (function(){
+  if(!window.THREE){ showFail("The 3D library could not load. Check your internet connection and reload the page."); return; }
+  const stage = $("stage");
+  let renderer;
+  try{ renderer = new THREE.WebGLRenderer({antialias:true}); }catch(e){ showFail("This browser has 3D graphics (WebGL) turned off. Open the page in Chrome or Edge on a computer, or enable hardware acceleration."); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let groundMat = null;
+  function applyTheme(){ scene.background = new THREE.Color(css("--sky")); if(groundMat) groundMat.color.set(css("--ground")); }
+  const camera = new THREE.PerspectiveCamera(42, 1, 1, 3000);
+  const controls = THREE.OrbitControls ? new THREE.OrbitControls(camera, renderer.domElement) : {target:new THREE.Vector3(),update(){}};
+  controls.enableDamping = true; controls.maxPolarAngle = Math.PI*0.495; controls.minDistance = 15; controls.maxDistance = 600;
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a9a80, 0.65));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(110,170,120); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048,2048);
+  Object.assign(sun.shadow.camera,{left:-140,right:140,top:140,bottom:-140,near:10,far:520});
+  scene.add(sun);
+
+  const P = (x,n,y=0)=>new THREE.Vector3(x-72, y, -(n-52));
+  const mat = (c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.85},o));
+  let roofs,tagEls=[],TAGS=[],gm; const world=new THREE.Group(); scene.add(world);
+  function build(){ const C=CFG; while(world.children.length) world.remove(world.children[0]); tagEls.forEach(e=>e.remove()); tagEls=[];
+  function box(x0,n0,x1,n1,h,y0,m,cast=true){
+    const g = new THREE.BoxGeometry(Math.abs(x1-x0), h, Math.abs(n1-n0));
+    const me = new THREE.Mesh(g,m); me.position.copy(P((x0+x1)/2,(n0+n1)/2,y0+h/2));
+    me.castShadow = cast; me.receiveShadow = true; world.add(me); return me;
+  }
+  function poly(pts,y,m){
+    const s = new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0]-72, p[1]-52)));
+    const g = new THREE.ShapeGeometry(s); g.rotateX(-Math.PI/2);
+    const me = new THREE.Mesh(g,m); me.position.y = y; me.receiveShadow = true; world.add(me); return me;
+  }
+  function textTex(text,w,h,bg,fg,font){
+    const c=document.createElement("canvas"); c.width=w; c.height=h; const x=c.getContext("2d");
+    if(bg){ x.fillStyle=bg; x.fillRect(0,0,w,h); }
+    x.fillStyle=fg; x.font=font; x.textAlign="center"; x.textBaseline="middle"; x.fillText(text,w/2,h/2+2);
+    const t=new THREE.CanvasTexture(c); t.anisotropy=4; return t;
+  }
+
+  groundMat = mat(css("--ground"));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(1600,1600), groundMat);
+  ground.rotation.x = -Math.PI/2; ground.position.y = -0.3; ground.receiveShadow = true; world.add(ground);
+  applyTheme();
+  const PL = [[0,0],[150.4,0],[133.4,102.6],[0,103.6]];
+  poly(PL,0.02,mat(0xb9c4a8));
+  const edgeX = n => 150.4 - 17*n/102.6;
+
+  const ex = [102.6/104,17/104];
+  const eA=[150.4,0],eB=[133.4,102.6];
+  const dir=[(eB[0]-eA[0])/104,(eB[1]-eA[1])/104];
+  const ext = (p,t)=>[p[0]+dir[0]*t,p[1]+dir[1]*t];
+  const a0=ext(eA,-30), b0=ext(eA,175);
+  poly([a0,[a0[0]+ex[0]*20,a0[1]+ex[1]*20],[b0[0]+ex[0]*20,b0[1]+ex[1]*20],b0],0.03,mat(0x6f7570));
+  function roadLabel(t,text){
+    const g=new THREE.PlaneGeometry(46,6.4); g.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:textTex(text,1024,142,null,"#e9ece6","bold 92px Arial"),transparent:true}));
+    const p=ext(eA,t); m.position.copy(P(p[0]+ex[0]*10,p[1]+ex[1]*10,0.08));
+    m.rotation.y = Math.atan2(dir[1], dir[0]); world.add(m);
+  }
+  roadLabel(40,"20 FT ROAD");
+  roadLabel(150,"TO LANE (GALI)  ▶");
+
+  const wallM = mat(0xe8e2d6);
+  function wall(p,q){
+    const dx=q[0]-p[0], dn=q[1]-p[1], L=Math.hypot(dx,dn);
+    const me=new THREE.Mesh(new THREE.BoxGeometry(L,6,0.9),wallM);
+    me.position.copy(P((p[0]+q[0])/2,(p[1]+q[1])/2,3));
+    me.rotation.y = Math.atan2(dn,dx); me.castShadow=true; me.receiveShadow=true; world.add(me);
+  }
+  wall(PL[0],PL[1]); wall(PL[2],PL[3]); wall(PL[3],PL[0]);
+  const g0=ext(eA,70), g1=ext(eA,90);
+  wall(PL[1],g0); wall(g1,PL[2]);
+  [g0,g1].forEach(g=>box(g[0]-1.2,g[1]-1.2,g[0]+1.2,g[1]+1.2,8,0,mat(0x7a5a44)));
+
+  const white = mat(0xffffff,{roughness:0.6});
+  const poleM = mat(0x5d6670,{metalness:0.5,roughness:0.5});
+  const wood = mat(0x8a5a3a), woodDark = mat(0x5a3a26), slab = mat(0xd8d2c6);
+
+  const TX0=6,TX1=6+C.tl,TN0=2,TN1=2+C.tw, TC=(TN0+TN1)/2, XC=(TX0+TX1)/2;
+  box(TX0,TN0,TX1,TN1,0.4,0,mat(C.turfCol,{roughness:1}),false);
+  const lineW=0.4,y1=0.42;
+  const L=(x0,n0,x1,n1)=>box(x0,n0,x1,n1,0.02,y1,white,false);
+  L(TX0+3,TN0+3,TX1-3,TN0+3+lineW); L(TX0+3,TN1-3-lineW,TX1-3,TN1-3);
+  L(TX0+3,TN0+3,TX0+3+lineW,TN1-3); L(TX1-3-lineW,TN0+3,TX1-3,TN1-3);
+  L(XC-lineW/2,TN0+3,XC+lineW/2,TN1-3);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(8.6,9,48), white); ring.rotation.x=-Math.PI/2; ring.position.copy(P(XC,TC,y1+0.03)); world.add(ring);
+  [[TX0+3,TX0+15],[TX1-15,TX1-3]].forEach(([a,b])=>{ L(a,TC-10,b,TC-10+lineW); L(a,TC+10-lineW,b,TC+10); const xx=(a<50)?b:a; L(xx-lineW/2,TC-10,xx+lineW/2,TC+10); });
+  box(XC-28,TC-2,XC+28,TC+2,0.05,0.4,mat(0xc9b48a,{roughness:1}),false);
+  const goalM = mat(0xf5f5f5,{roughness:0.4});
+  [TX0+3,TX1-3].forEach(gx=>{
+    box(gx-0.3,TC-7,gx+0.3,TC-6.4,7,0.4,goalM); box(gx-0.3,TC+6.4,gx+0.3,TC+7,7,0.4,goalM);
+    box(gx-0.3,TC-7,gx+0.3,TC+7,0.6,7.2,goalM);
+  });
+  const netCanvas=document.createElement("canvas"); netCanvas.width=netCanvas.height=64;
+  const nc=netCanvas.getContext("2d"); nc.strokeStyle="rgba(30,30,30,0.85)"; nc.lineWidth=2;
+  nc.beginPath(); for(let i=0;i<=64;i+=16){nc.moveTo(i,0);nc.lineTo(i,64);nc.moveTo(0,i);nc.lineTo(64,i);} nc.stroke();
+  function netMat(rx,ry){ const t=new THREE.CanvasTexture(netCanvas); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rx,ry);
+    return new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:0.55,side:THREE.DoubleSide,depthWrite:false}); }
+  const NH=C.nh;
+  function netPlane(x0,n0,x1,n1){
+    const Lh=Math.hypot(x1-x0,n1-n0);
+    const me=new THREE.Mesh(new THREE.PlaneGeometry(Lh,NH),netMat(Lh/2,NH/2)); me.position.copy(P((x0+x1)/2,(n0+n1)/2,NH/2));
+    me.rotation.y=Math.atan2(n1-n0,x1-x0); world.add(me);
+  }
+  netPlane(TX0,TN0,TX1,TN0); netPlane(TX0,TN1,TX1,TN1); netPlane(TX0,TN0,TX0,TN1); netPlane(TX1,TN0,TX1,TN1);
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(TX1-TX0,TN1-TN0),netMat((TX1-TX0)/3,(TN1-TN0)/3));
+  top.rotation.x=-Math.PI/2; top.position.copy(P(XC,TC,NH)); world.add(top);
+  for(let x=TX0;x<=TX1;x+=20){ [TN0,TN1].forEach(n=>box(x-0.4,n-0.4,x+0.4,n+0.4,NH+4,0,poleM)); }
+  for(let n=TN0+20;n<TN1;n+=20){ [TX0,TX1].forEach(x=>box(x-0.4,n-0.4,x+0.4,n+0.4,NH+4,0,poleM)); }
+  const lampM=mat(0xfff6d0,{emissive:0xfff3c0,emissiveIntensity:0.6});
+  [[TX0,TN0],[XC,TN0],[TX1,TN0],[TX0,TN1],[XC,TN1],[TX1,TN1]].forEach(([x,n])=>{
+    const off = n===TN0?-0.9:1.5; box(x-2,n+off-0.6,x+2,n+off+0.6,1.4,NH+2.5,lampM);
+  });
+
+  const pathM = mat(0xcfc8b8,{roughness:1}), pave = mat(0x9fa3a0,{roughness:1});
+  poly([[2,62.5],[108,62.5],[108,65],[2,65]],0.04,pathM);
+  poly([[2,83],[92,83],[92,86],[2,86]],0.04,pathM);
+  poly([[24,86],[28,86],[28,101.5],[24,101.5]],0.04,pathM);
+
+  roofs = new THREE.Group(); world.add(roofs);
+  const wallMat = mat(0xf1ebe0), floorMat = mat(0xbfb6a6), frameM = mat(0x3e4448,{metalness:0.5,roughness:0.5});
+  const glass = mat(0x88b8d4,{roughness:0.15,metalness:0.3,transparent:true,opacity:0.55});
+  function room(x0,n0,x1,n1,h,label,roofColor){
+    const t=0.75;
+    box(x0,n0,x1,n1,0.5,0,floorMat,false);
+    box(x0,n1-t,x1,n1,h,0,wallMat);
+    box(x0,n0,x0+t,n1-t,h,0,wallMat);
+    box(x1-t,n0,x1,n1-t,h,0,wallMat);
+    box(x0+t,n0,x1-t,n0+t,2.4,h-2.4,wallMat);
+    box(x0+t,n0,x1-t,n0+t,1.2,0,wallMat);
+    box(x0+t,n0+0.15,x1-t,n0+0.6,h-3.6,1.2,glass,false);
+    for(let x=x0+t+7;x<x1-t-2;x+=7) box(x-0.15,n0,x+0.15,n0+t,h-2.4,0,frameM,false);
+    const r=box(x0-1,n0-2.2,x1+1,n1+0.6,0.8,h,mat(roofColor,{metalness:0.3,roughness:0.6})); world.remove(r); roofs.add(r);
+    const W=Math.min(x1-x0-6, 30), H=2.1;
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshBasicMaterial({map:textTex(label,Math.round(128*W/H),128,"#1E6E47","#ffffff","bold 74px Arial")}));
+    sign.position.copy(P((x0+x1)/2,n0-0.06,h-1.2)); world.add(sign);
+  }
+
+  room(4,65,4+C.cw,65+C.cd,11,"CAFÉ",C.cafeCol);
+  box(8,78.5,30,80.6,3.6,0.5,wood);
+  box(31,73,31.5,82.2,9,0.5,wallMat);
+  box(33,79,39,82,3,0.5,mat(0xbfc5c9,{metalness:0.6,roughness:0.3}));
+  [[10,70],[18,70],[26,70],[10,75],[18,75],[26,75]].forEach(([x,n])=>{
+    box(x-1.2,n-1.2,x+1.2,n+1.2,2.5,0.5,woodDark);
+    box(x-2.6,n-0.6,x-1.6,n+0.6,1.5,0.5,wood); box(x+1.6,n-0.6,x+2.6,n+0.6,1.5,0.5,wood);
+  });
+
+  box(44,65,90,83,0.3,0,mat(0xa9845e,{roughness:1}),false);
+  for(let x=46;x<88;x+=8) box(x,65.3,x+5,66.6,1.5,0.3,wood);
+  const umbA=mat(0xd9643a), umbB=mat(0xf0c24a);
+  [[50,71],[61,71],[72,71],[83,71],[50,79],[61,79],[72,79],[83,79]].slice(0,C.umb).forEach(([x,n],i)=>{
+    box(x-0.2,n-0.2,x+0.2,n+0.2,8,0.3,poleM);
+    const c=new THREE.Mesh(new THREE.ConeGeometry(4.2,1.8,8),(i+(i>3?1:0))%2?umbA:umbB); c.position.copy(P(x,n,8.8)); c.castShadow=true; world.add(c);
+    box(x-1.5,n-1.5,x+1.5,n+1.5,2.5,0.3,wood);
+  });
+
+  room(28,86,28+C.hw,86+C.hd,12,"BILLIARDS · GAMING",C.hallCol);
+  const felt = mat(0x1f7a4a,{roughness:1});
+  [36,52].forEach(cx=>{
+    const cy=94;
+    box(cx-3.8,cy-2.1,cx+3.8,cy+2.1,2.4,0.5,woodDark);
+    box(cx-3.4,cy-1.7,cx+3.4,cy+1.7,0.12,2.9,felt,false);
+    box(cx-2.6,cy-0.4,cx+2.6,cy+0.4,0.4,8,lampM,false);
+    box(cx-0.05,cy-0.05,cx+0.05,cy+0.05,3.6,8.4,poleM,false);
+  });
+  const black = mat(0x15181b,{roughness:0.3});
+  [[66,72],[78,84]].forEach(([a,b])=>{ box(a,100.2,b,100.7,3.4,4,black); box(a+0.5,94.5,b-0.5,97.2,2,0.5,mat(0x2f3f63)); });
+  box(62,88,69,91.6,2.6,0.5,mat(0x2e5c8c));
+  box(74,88.4,79.5,91,2.8,0.5,wood);
+  box(82,88.2,85,91.2,2.2,0.5,woodDark);
+
+  box(4,86,4+C.ww,86+C.wd,10,0,mat(0xdfe6e2));
+  const wr=box(3.2,85.2,4.8+C.ww,87.3+C.wd,0.7,10,slab); world.remove(wr); roofs.add(wr);
+  box(7,85.6,10,86.1,7,0,wood); box(17,85.6,20,86.1,7,0,wood);
+  const ws=new THREE.Mesh(new THREE.PlaneGeometry(14,1.6),new THREE.MeshBasicMaterial({map:textTex("GENTS      LADIES",1120,128,"#16211B","#ffffff","bold 70px Arial")}));
+  ws.position.copy(P(14,85.55,8.4)); world.add(ws);
+
+  poly([[108,1],[edgeX(1)-1,1],[edgeX(63)-1,63],[108,63]],0.05,pave);
+  const carCols=[0xb23a3a,0x2f4f7f,0xe5e5e5,0x3a3a3a,0x7a7f86,0x2f6b4f];
+  [4.5,13.5,22.5,31.5,40.5,49.5].slice(0,C.cars).forEach((n,i)=>{
+    box(112,n,127,n+6.5,3,0.4,mat(carCols[i],{metalness:0.4,roughness:0.4}));
+    box(115,n+0.4,123,n+6.1,1.8,3.4,mat(0x223240,{roughness:0.2}));
+  });
+  for(let n=3.5;n<=58.5;n+=9) box(110,n-0.15,130,n+0.15,0.02,0.07,white,false);
+
+  poly([[92,65],[edgeX(65)-1,65],[edgeX(102)-1,102],[92,102]],0.05,pave);
+  poly([[108,63],[edgeX(63)-1,63],[edgeX(65)-1,65],[108,65]],0.05,pave);
+  box(121,93.5,128.5,100,8,0,mat(0x1E6E47)); box(120,92.5,129.5,101,0.5,8,slab);
+  for(let n=67;n<=85;n+=3) box(94,n,99,n+1.2,2.6,0,mat(0x333333));
+  [[104,70],[104,82]].forEach(([x,n])=>{ box(x-1.2,n-1.2,x+1.2,n+1.2,1.6,0,mat(0x8f8676)); const s=new THREE.Mesh(new THREE.SphereGeometry(2,10,8),mat(0x4d7a3f)); s.position.copy(P(x,n,2.6)); s.castShadow=true; world.add(s); });
+
+  const trunk=mat(0x6b4a33), leaf=mat(0x3f6b3a);
+  [[-14,20],[-14,60],[-14,95],[20,118],[70,116],[112,116],[40,-14],[100,-14],[132,-16]].slice(0,C.trees?99:0).forEach(([x,n])=>{
+    box(x-0.6,n-0.6,x+0.6,n+0.6,8,0,trunk);
+    const s=new THREE.Mesh(new THREE.SphereGeometry(6,12,10),leaf); s.position.copy(P(x,n,12)); s.castShadow=true; world.add(s);
+  });
+
+  const nac=document.createElement("canvas"); nac.width=nac.height=256; const na=nac.getContext("2d");
+  na.fillStyle="#16211B"; na.beginPath(); na.moveTo(128,18); na.lineTo(186,150); na.lineTo(128,122); na.lineTo(70,150); na.closePath(); na.fill();
+  na.font="bold 84px Arial"; na.textAlign="center"; na.textBaseline="middle"; na.fillText("N",128,205);
+  const ng=new THREE.PlaneGeometry(16,16); ng.rotateX(-Math.PI/2);
+  const nm=new THREE.Mesh(ng,new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(nac),transparent:true}));
+  nm.position.copy(P(-20,-18,0.1)); world.add(nm);
+
+  gm=ext(eA,80);
+  TAGS=[[XC,TC,36],[22,74,14],[67,75,11],[58,94,15],[14,94,13],[120,30,6],[124,97,11],[gm[0]+4,gm[1],10]];
+  tagEls = TAGS.map((t,i)=>{ const d=document.createElement("div"); d.className="tag"; d.textContent=i+1; stage.appendChild(d); return d; });
+
+
+  roofs.visible=$("roofBtn").getAttribute("aria-pressed")!=="true"; }
+  build(); window.rebuild3d=build;
+
+  const roofBtn=$("roofBtn");
+  roofBtn.addEventListener("click",()=>{ const on = roofBtn.getAttribute("aria-pressed")!=="true"; roofBtn.setAttribute("aria-pressed",on?"true":"false"); roofs.visible=!on; });
+
+  const V3=(x,n,y)=>{const v=P(x,n,y);return [v.x,v.y,v.z];};
+  const VIEWS={
+    aerial:{p:[205,150,40],t:[-4,0,0]},
+    entry:{p:V3(gm[0]-6,gm[1],8),t:V3(30,72,6)},
+    seat:{p:V3(70,88,15),t:V3(56,30,2)},
+    plan:{p:[0.6,300,0],t:[0,0,0]}
+  };
+  let anim=null;
+  function go(v,instant){
+    const V=VIEWS[v]; const to=new THREE.Vector3(...V.p), tt=new THREE.Vector3(...V.t);
+    if(instant || matchMedia("(prefers-reduced-motion: reduce)").matches){ camera.position.copy(to); controls.target.copy(tt); controls.update(); return; }
+    anim={fp:camera.position.clone(),ft:controls.target.clone(),to,tt,t:0};
+  }
+  document.querySelectorAll(".views button[data-v]").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll(".views button[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false")); go(b.dataset.v);
+  }));
+  go("aerial",true);
+
+  function resize(){ const w=stage.clientWidth,h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(stage); resize();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);
+  new MutationObserver(applyTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+  const v3=new THREE.Vector3();
+  function loop(){
+    requestAnimationFrame(loop);
+    if(anim){ anim.t=Math.min(1,anim.t+0.035); const e=1-Math.pow(1-anim.t,3);
+      camera.position.lerpVectors(anim.fp,anim.to,e); controls.target.lerpVectors(anim.ft,anim.tt,e); if(anim.t>=1) anim=null; }
+    controls.update(); renderer.render(scene,camera);
+    const w=stage.clientWidth,h=stage.clientHeight;
+    TAGS.forEach((t,i)=>{ v3.copy(P(t[0],t[1],t[2])).project(camera);
+      const vis = v3.z<1 && Math.abs(v3.x)<1.05 && Math.abs(v3.y)<1.05;
+      tagEls[i].hidden=!vis; if(vis){ tagEls[i].style.left=((v3.x+1)/2*w)+"px"; tagEls[i].style.top=((1-v3.y)/2*h)+"px"; } });
+  }
+  loop();
+})(); }catch(e){ console.error(e); showFail("The 3D model could not be drawn on this device. The cost estimate and projections below still work."); }
+
+(function(){
+const $e=(t,a={},k=[])=>{const e=document.createElement(t);Object.assign(e,a);[].concat(k).forEach(c=>e.append(c));return e};
+const btn=(t,f)=>$e("button",{type:"button",textContent:t,onclick:f});
+let tm;const upd=d3=>{save();applyText();renderLegend();renderArea();render();if(d3){clearTimeout(tm);tm=setTimeout(()=>window.rebuild3d&&window.rebuild3d(),150);}};
+const nf=(lab,key,min,max,step,d3)=>{const i=$e("input",{type:"number",value:CFG[key],min,max,step});
+ i.oninput=()=>{const v=parseFloat(i.value);if(isFinite(v)&&v>=min&&v<=max){CFG[key]=v;upd(d3)}};
+ i.onchange=()=>{let v=parseFloat(i.value);v=isFinite(v)?Math.min(max,Math.max(min,v)):CFG[key];i.value=CFG[key]=v;upd(d3)};
+ return $e("label",{className:"inp"},[lab+(d3?" ("+min+"–"+max+")":""),i])};
+const cf=(lab,key)=>$e("label",{className:"inp"},[lab,$e("input",{type:"color",value:CFG[key],oninput(){CFG[key]=this.value;upd(true)}})]);
+const tx=(lab,key,multi,get)=>$e("label",{className:"inp"},[lab,$e(multi?"textarea":"input",{rows:4,value:get?get():CFG[key],oninput(){CFG[key]=this.value;upd()}})]);
+const sel=(v,o,f)=>$e("select",{onchange(){f(this.value)}},o.map(x=>$e("option",{value:x[0],textContent:x[1],selected:x[0]===v})));
+const note=t=>$e("p",{className:"note",textContent:t});
+const tabs=$e("div",{id:"tabs"}),panes=$e("div",{id:"panes"}),PS=[];
+const add=(name,nodes)=>{const p=$e("div",{className:"pane"},nodes),b=$e("button",{type:"button",textContent:name});
+ b.onclick=()=>{PS.forEach(x=>{x[0].classList.remove("on");x[1].classList.remove("on")});p.classList.add("on");b.classList.add("on")};
+ PS.push([p,b]);tabs.append(b);panes.append(p);return p};
+const IN=[...document.querySelectorAll(".inputs")];
+
+add("Text",[tx("Page title","tH"),tx("Top label","tEy"),tx("Description","tLede",1),tx("Footer note","tFoot",1),
+ tx("Legend, one per line: Name|Description","leg",1,()=>CFG.leg||LEG.map(l=>l.join("|")).join("\n"))]);
+add("Site",[nf("Plot area (sq ft)","plot",1,1e9,"any"),nf("Parking, plaza & walkways (sq ft)","park",0,1e9,100),nf("Outdoor seating deck (sq ft)","deck",0,1e9,10),nf("Boundary wall length (rft)","wall",0,1e9,10),
+ note("These feed the area table and the cost estimate. The 3D site outline is fixed.")]);
+const tr=$e("label",{className:"inp"},[$e("span",{textContent:"Show trees "}),$e("input",{type:"checkbox",checked:!!CFG.trees,onchange(){CFG.trees=this.checked?1:0;upd(true)}})]);
+add("3D model",[nf("Turf length (ft)","tl",40,100,1,1),nf("Turf width (ft)","tw",30,60,1,1),nf("Net height (ft)","nh",15,45,1,1),
+ nf("Café width (ft)","cw",30,39,1,1),nf("Café depth (ft)","cd",12,20,1,1),nf("Billiards hall width (ft)","hw",40,60,1,1),nf("Billiards hall depth (ft)","hd",12,15.5,.5,1),
+ nf("Washroom width (ft)","ww",18,23,1,1),nf("Washroom depth (ft)","wd",10,15.5,.5,1),nf("Parked cars","cars",0,6,1,1),nf("Umbrella tables","umb",0,8,1,1),
+ cf("Turf colour","turfCol"),cf("Café roof","cafeCol"),cf("Hall roof","hallCol"),tr,note("Limits keep every block inside the plot. Size changes also update the area table and cost lines that are priced per sq ft.")]);
+
+const cp=add("Cost estimate",[]);
+const OPT=[["","Manual ₹ lakh"],["turf","₹/sq ft × turf area"],["cafe","₹/sq ft × café area"],["hall","₹/sq ft × hall area"],["wash","₹/sq ft × washroom area"],["paver","₹/sq ft × paved area"],["wall","₹/rft × wall length"]];
+function drawCost(){cp.textContent="";
+ cp.append($e("label",{className:"inp"},["Contingency (% of site, turf, buildings, equipment, utilities)",$e("input",{type:"number",step:.5,value:CONT_PCT,oninput(){CONT_PCT=parseFloat(this.value)||0;upd()}})]),
+  $e("label",{className:"inp"},["Working-capital margin (₹ lakh)",$e("input",{type:"number",step:.5,value:WC,oninput(){WC=parseFloat(this.value)||0;upd()}})]));
+ COST.forEach((G,gi)=>{
+  cp.append($e("div",{className:"cg"},[$e("input",{value:G.g,oninput(){G.g=this.value;upd()}}),sel(G.t,[["A","Civil"],["D","Equipment"],["G","Pre-operative"]],v=>{G.t=v;upd()}),btn("✕",()=>{COST.splice(gi,1);upd();drawCost()})]));
+  G.items.forEach((it,ii)=>{
+   const kids=[$e("input",{value:it[0],oninput(){it[0]=this.value;upd()}}),btn("✕",()=>{G.items.splice(ii,1);upd();drawCost()}),
+    sel(it[3],OPT,v=>{it[3]=v;if(v&&!it[4])it[4]=100;upd();drawCost()}),
+    $e("input",{type:"number",step:"any",value:it[3]?it[4]:it[2],oninput(){const v=parseFloat(this.value)||0;if(it[3])it[4]=v;else it[2]=v;upd()}})];
+   if(!it[3])kids.push($e("input",{value:it[1],placeholder:"Basis / note",oninput(){it[1]=this.value;upd()}}));
+   cp.append($e("div",{className:"ci"},kids));
+  });
+  cp.append(btn("+ Add item",()=>{G.items.push(["New item","",0,"",0]);upd();drawCost()}));
+ });
+ cp.append(btn("+ Add group",()=>{COST.push({g:"H. New group",t:"D",items:[]});upd();drawCost()}));
+}
+drawCost();
+add("Loan",[IN[0]]);add("Revenue",[IN[1]]);add("Running costs",[IN[2]]);
+IN.forEach(x=>x.querySelectorAll("input").forEach(i=>i.addEventListener("input",save)));
+const imp=$e("input",{type:"file",accept:".json",onchange(){const f=this.files[0];if(!f)return;f.text().then(t=>{JSON.parse(t);localStorage.setItem(KEY,t);location.reload()}).catch(()=>alert("That is not a valid settings file."))}});
+add("Data",[note("Settings are saved in this browser only. Export a file to back them up or share your setup."),
+ btn("Export settings (.json)",()=>{save();const a=$e("a",{href:URL.createObjectURL(new Blob([localStorage.getItem(KEY)||"{}"],{type:"application/json"})),download:"turf-settings.json"});a.click()}),
+ $e("label",{className:"inp"},["Import settings file",imp]),
+ btn("Reset everything to defaults",()=>{if(confirm("Reset all settings to defaults?")){localStorage.removeItem(KEY);location.reload()}})]);
+PS[0][1].click();
+const dr=$e("aside",{id:"drawer",ariaLabel:"Settings"},[$e("div",{id:"dh"},[$e("h3",{textContent:"Settings"}),btn("Close",()=>dr.classList.remove("open"))]),tabs,panes]);
+const sb=$e("button",{id:"setBtn",type:"button",textContent:"⚙ Settings",onclick:()=>dr.classList.toggle("open")});
+document.body.append(sb,dr);
+addEventListener("keydown",e=>{if(e.key==="Escape")dr.classList.remove("open")});
+applyText();renderLegend();renderArea();render();
+})();
+</script>
+
+</body>
+</html>
