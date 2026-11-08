@@ -367,3 +367,44 @@ input, textarea {
 .cs-btn.off { background: #ef4444; border-color: #ef4444; }
 .cs-btn.cs-accept { background: #22c55e; border-color: #22c55e; color: #06210f; }
 .cs-btn.cs-end { background: #ef4444; border-color: #ef4444; display: flex; }
+
+/* ---------- Call screen v2: round icon buttons ---------- */
+.cs-bar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 12px calc(28px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.65));
+}
+.cs-ico {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(60, 66, 80, 0.9);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.cs-ico svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cs-ico.off { background: #f3f4f6; color: #111827; }
+.cs-ico.cs-accept { background: #22c55e; }
+.cs-ico.cs-end { background: #ef4444; }
+.cs-ico.cs-end svg { transform: rotate(135deg); }
+.cs-ico:active { opacity: 0.8; }
