@@ -11,9 +11,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <!-- Modular Styles -->
-  <link rel="stylesheet" href="css/theme.css?v=5">
-  <link rel="stylesheet" href="css/layout.css?v=5">
-  <link rel="stylesheet" href="css/extra.css?v=5">
+  <link rel="stylesheet" href="css/theme.css?v=6">
+  <link rel="stylesheet" href="css/layout.css?v=6">
+  <link rel="stylesheet" href="css/extra.css?v=6">
 </head>
 <body>
 
@@ -131,6 +131,27 @@
   </footer>
 </div>
 
+<!-- Call screen (voice + video) -->
+<div id="call-screen" class="cs-root">
+  <div id="cs-frame-slot"></div>
+  <div id="call-cover" class="cs-cover">
+    <div class="cs-avatar" id="call-avatar">P</div>
+    <div class="cs-name" id="call-name">Partner</div>
+    <div class="cs-status" id="call-status"></div>
+  </div>
+  <div id="call-top" class="cs-top">
+    <div class="cs-top-name" id="top-name"></div>
+    <div class="cs-top-status" id="top-status"></div>
+  </div>
+  <div class="cs-bar">
+    <button class="cs-btn" id="call-mic-btn" onclick="toggleCallMic()">Mute</button>
+    <button class="cs-btn" id="call-cam-btn" onclick="toggleCallCam()">Camera</button>
+    <button class="cs-btn" id="call-spk-btn" onclick="toggleCallSpk()">Speaker</button>
+    <button class="cs-btn cs-accept" id="call-accept" onclick="acceptCall()">Accept</button>
+    <button class="cs-btn cs-end" id="call-end" onclick="hangUp()">End</button>
+  </div>
+</div>
+
 <!-- Native Settings Screen -->
 <div id="settings-screen">
   <div class="settings-nav">
@@ -177,6 +198,21 @@
         <div class="row-content">
           <div class="row-title">Chat Font Size</div>
           <div class="row-subtitle" id="current-size-label">15px</div>
+        </div>
+        <div class="row-arrow">›</div>
+      </div>
+    </div>
+
+    <div class="section-label">CALLS</div>
+    <div class="os-card">
+      <div class="os-row" onclick="changeContactName()">
+        <svg class="row-icon-svg" viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <div class="row-content">
+          <div class="row-title">Contact name</div>
+          <div class="row-subtitle" id="current-contact-label">Partner</div>
         </div>
         <div class="row-arrow">›</div>
       </div>
@@ -250,9 +286,9 @@
 </div>
 
 <!-- Modular Scripts -->
-<script src="js/config.js?v=5"></script>
-<script src="js/app.js?v=5"></script>
-<script src="js/transport.js?v=5"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
+<script src="js/transport.js?v=6"></script>
 
 </body>
 </html>
