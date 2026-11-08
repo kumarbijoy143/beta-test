@@ -3,7 +3,7 @@
 // Live signals  : rooms/<room>/ctl   (call, ft) - ignored if older than 45 s
 // Presence      : rooms/<room>/pres/<deviceId> (online + typing)
 
-const FB_DURABLE = { chat: 1, ack: 1, read: 1, edit: 1, react: 1, purge: 1, cfg: 1, fmeta: 1, fchunk: 1, fcancel: 1 };
+const FB_DURABLE = { chat: 1, ack: 1, read: 1, edit: 1, react: 1, purge: 1, cfg: 1, fmeta: 1, fchunk: 1, fcancel: 1, cend: 1 };
 const FB_LIVE_MAX_AGE = 45000;
 
 let fbDb = null, fbRoom = "", fbOffset = 0, fbStarted = false, fbPresRef = null;
