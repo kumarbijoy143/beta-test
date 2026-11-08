@@ -4,7 +4,7 @@
 //   test version : "term_test_"
 //   working app  : "term_"
 // ---------------------------------------------------------------
-const STORE_PREFIX = "term_";
+const STORE_PREFIX = "term_test_";
 
 const PIESOCKET_CLUSTER_ID = "free.blr2";
 
