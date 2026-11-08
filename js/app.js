@@ -424,7 +424,8 @@ function handleCtl(o) {
       logSys("SESSION BUFFER SHREDDED BY PEER.");
       break;
     case "cfg": applyRemoteConfig(o.enabled, o.duration); break;
-    case "call": handleCallSignal(o); break;
+    case "call":
+    case "cend": handleCallSignal(o); break;
     case "fmeta":
     case "fchunk":
     case "fcancel": handleFileOp(o); break;
@@ -1021,8 +1022,22 @@ function applyReactionToBubble(msgId, emoji) {
 
 // =====================================================================
 // CALLS (voice + video) through VDO.Ninja. Signals travel through the encrypted channel.
-const call = { state: "idle", video: false, room: "", pw: "", timer: null, joinTimer: null, tick: null,
-  t0: 0, joined: false, micOn: true, camOn: true, spkOn: true };
+// Live signals (invite, accept, heartbeat) use op "call". Important ones (end, mode, video requests)
+// use op "cend", which is durable, so they still arrive after a dropped connection.
+const call = { state: "idle", video: false, facing: "front", room: "", pw: "", timer: null, joinTimer: null,
+  tick: null, hbTimer: null, hbWatch: null, lastHb: 0, t0: 0, joined: false,
+  micOn: true, camOn: true, spkOn: true };
+
+const ICON = {
+  mic: '<svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+  micOff: '<svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/><line x1="3" y1="3" x2="21" y2="21"/></svg>',
+  spk: '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+  spkOff: '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>',
+  cam: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/></svg>',
+  camOff: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/><line x1="2" y1="2" x2="22" y2="22"/></svg>',
+  flip: '<svg viewBox="0 0 24 24"><path d="M3 7h13l-3-3"/><path d="M21 17H8l3 3"/></svg>',
+  phone: '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+};
 
 function getContactName() { return lsGet("contact_name", "Partner") || "Partner"; }
 
@@ -1043,6 +1058,14 @@ async function changeContactName() {
   updateContactLabel();
 }
 
+function sendSig(k, extra) {
+  return sendCtl(Object.assign({ op: "cend", k, room: call.room }, extra || {}));
+}
+
+function sendLive(k, extra) {
+  return sendCtl(Object.assign({ op: "call", k, room: call.room }, extra || {}));
+}
+
 function callUI() {
   const scr = $("call-screen");
   if (call.state === "idle") { scr.style.display = "none"; return; }
@@ -1051,37 +1074,58 @@ function callUI() {
   $("call-avatar").innerText = name.charAt(0).toUpperCase();
   $("call-name").innerText = name;
   $("top-name").innerText = name;
+  const live = call.state === "active" && call.joined;
   const kind = call.video ? "video" : "voice";
   let status = "";
   if (call.state === "calling") status = "Calling…";
   else if (call.state === "ringing") status = "Incoming " + kind + " call";
   else if (call.state === "active" && !call.joined) status = "Connecting…";
+  else if (live && !call.video) status = fmtTime(Date.now() - call.t0);
   $("call-status").innerText = status;
-  const live = call.state === "active" && call.joined;
-  $("call-cover").style.display = live ? "none" : "flex";
-  $("call-top").style.display = live ? "flex" : "none";
-  const inCall = call.state === "active";
-  $("call-accept").style.display = call.state === "ringing" ? "flex" : "none";
-  $("call-end").innerText = call.state === "ringing" ? "Decline" : "End";
-  $("call-mic-btn").style.display = inCall ? "flex" : "none";
-  $("call-spk-btn").style.display = inCall ? "flex" : "none";
-  $("call-cam-btn").style.display = inCall && call.video ? "flex" : "none";
+  $("call-cover").style.display = (!live || !call.video) ? "flex" : "none";
+  $("call-top").style.display = live && call.video ? "flex" : "none";
+
+  const ringing = call.state === "ringing";
+  const active = call.state === "active";
+  $("call-accept").style.display = ringing ? "flex" : "none";
+  $("call-end").style.display = "flex";
+  $("call-mic-btn").style.display = active ? "flex" : "none";
+  $("call-spk-btn").style.display = active ? "flex" : "none";
+  $("call-mode-btn").style.display = active ? "flex" : "none";
+  $("call-cam-btn").style.display = active && call.video ? "flex" : "none";
+  $("call-flip-btn").style.display = active && call.video ? "flex" : "none";
+  $("call-accept").innerHTML = ICON.phone;
+  $("call-end").innerHTML = ICON.phone;
+  $("call-end").title = ringing ? "Decline" : "End";
+  $("call-flip-btn").innerHTML = ICON.flip;
+  $("call-mode-btn").innerHTML = call.video ? ICON.phone : ICON.cam;
+  $("call-mode-btn").title = call.video ? "Switch to voice" : "Switch to video";
   refreshCallButtons();
 }
 
 function refreshCallButtons() {
   const mic = $("call-mic-btn"), spk = $("call-spk-btn"), cam = $("call-cam-btn");
-  mic.innerText = call.micOn ? "Mute" : "Unmute";
+  mic.innerHTML = call.micOn ? ICON.mic : ICON.micOff;
   mic.classList.toggle("off", !call.micOn);
-  spk.innerText = call.spkOn ? "Speaker" : "Speaker off";
+  mic.title = call.micOn ? "Mute" : "Unmute";
+  spk.innerHTML = call.spkOn ? ICON.spk : ICON.spkOff;
   spk.classList.toggle("off", !call.spkOn);
-  cam.innerText = call.camOn ? "Camera" : "Camera off";
+  spk.title = call.spkOn ? "Speaker on" : "Speaker off";
+  cam.innerHTML = call.camOn ? ICON.cam : ICON.camOff;
   cam.classList.toggle("off", !call.camOn);
+  cam.title = call.camOn ? "Camera on" : "Camera off";
 }
 
 function postToCall(msg) {
   const f = $("vdo-frame");
   if (f && f.contentWindow) f.contentWindow.postMessage(msg, "*");
+}
+
+// Re-applies mute, speaker and camera states after the call frame loads.
+function applyCallStates() {
+  postToCall({ mic: call.micOn });
+  postToCall({ mute: !call.spkOn });
+  if (call.video) postToCall({ camera: call.camOn });
 }
 
 function toggleCallMic() {
@@ -1105,6 +1149,12 @@ function toggleCallSpk() {
   refreshCallButtons();
 }
 
+function flipCamera() {
+  if (call.state !== "active" || !call.video) return;
+  call.facing = call.facing === "front" ? "rear" : "front";
+  loadFrame();
+}
+
 function triggerCallHandOff(isVideo) { startCall(!!isVideo); }
 
 async function startCall(video) {
@@ -1113,19 +1163,20 @@ async function startCall(video) {
     return uiAlert("Peer is offline", "Calls need both phones online with the app open.");
   }
   Object.assign(call, {
-    state: "calling", video, joined: false, micOn: true, camOn: true, spkOn: true,
+    state: "calling", video: !!video, facing: "front", joined: false,
+    micOn: true, camOn: true, spkOn: true,
     room: "c" + uid() + uid(), pw: uid() + uid()
   });
   callUI();
-  sendCtl({ op: "call", k: "invite", video, room: call.room, pw: call.pw });
+  sendCtl({ op: "call", k: "invite", video: call.video, room: call.room, pw: call.pw });
   call.timer = setTimeout(() => { if (call.state === "calling") endCall("No answer", true); }, 45000);
 }
 
 function acceptCall() {
   if (call.state !== "ringing") return;
   clearTimeout(call.timer);
-  sendCtl({ op: "call", k: "accept" });
-  openVdo();
+  sendLive("accept");
+  openCall();
 }
 
 function hangUp() {
@@ -1137,41 +1188,63 @@ function vdoUrl() {
   const p = new URLSearchParams();
   p.set("room", call.room);
   p.set("password", call.pw);
-  p.set("webcam", "");
   p.set("autostart", "");
   p.set("cleanoutput", "");
-  if (!call.video) p.set("videodevice", "0");
+  if (call.video) {
+    p.set("webcam", "");
+    p.set("facing", call.facing === "rear" ? "rear" : "front");
+    p.set("minipreview", "");          // self-view as a small corner preview
+  } else {
+    p.set("miconly", "");              // audio only, no video player
+    p.set("audiodevice", "1");         // default microphone
+  }
   const t = getTurnConfig();
   if (t && t.url) p.set("turn", [t.user || "", t.cred || "", t.url].join(";"));
   return "https://vdo.ninja/?" + p.toString();
 }
 
-async function micCamProbe() {
+async function micCamProbe(video) {
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
-    const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: call.video });
+    const s = await navigator.mediaDevices.getUserMedia({ audio: true, video: !!video });
     s.getTracks().forEach(t => t.stop());
     return true;
   } catch (e) { return false; }
 }
 
-async function openVdo() {
-  closeVdo();
-  call.state = "active";
-  call.joined = false;
-  callUI();
-  const ok = await micCamProbe();
-  if (call.state === "idle") return;
-  if (!ok) {
-    await uiAlert("Mic or camera blocked", "Allow microphone and camera for this app in your phone's settings, then try again.");
-    return endCall("Call ended", true);
-  }
+function removeFrame() {
+  const f = $("vdo-frame");
+  if (f) { f.src = "about:blank"; f.remove(); }
+}
+
+function closeFrame() {
+  clearTimeout(call.joinTimer);
+  removeFrame();
+}
+
+function loadFrame() {
+  removeFrame();
   const f = document.createElement("iframe");
   f.id = "vdo-frame";
   f.allow = "camera; microphone; autoplay; fullscreen";
   f.src = vdoUrl();
   $("cs-frame-slot").appendChild(f);
-  clearTimeout(call.joinTimer);
+  setTimeout(applyCallStates, 4000);
+}
+
+async function openCall() {
+  closeFrame();
+  call.state = "active";
+  call.joined = false;
+  callUI();
+  const ok = await micCamProbe(call.video);
+  if (call.state === "idle") return;
+  if (!ok) {
+    await uiAlert("Mic or camera blocked", "Allow microphone and camera for this app in your phone's settings, then try again.");
+    return endCall("Call ended", true);
+  }
+  startHeartbeat();
+  loadFrame();
   call.joinTimer = setTimeout(markJoined, 20000);   // safety: the cover never stays up for good
 }
 
@@ -1183,18 +1256,15 @@ function markJoined() {
   call.t0 = Date.now();
   clearInterval(call.tick);
   call.tick = setInterval(updateCallTimer, 1000);
-  updateCallTimer();
+  applyCallStates();
   callUI();
 }
 
 function updateCallTimer() {
-  $("top-status").innerText = fmtTime(Date.now() - call.t0);
-}
-
-function closeVdo() {
-  clearTimeout(call.joinTimer);
-  const f = $("vdo-frame");
-  if (f) { f.src = "about:blank"; f.remove(); }
+  if (call.state !== "active" || !call.joined) return;
+  const t = fmtTime(Date.now() - call.t0);
+  if (call.video) $("top-status").innerText = t;
+  else $("call-status").innerText = t;
 }
 
 window.addEventListener("message", (e) => {
@@ -1204,15 +1274,66 @@ window.addEventListener("message", (e) => {
   if (/join/i.test(s)) markJoined();
 });
 
+// Heartbeat: each phone says "still here". If the other one goes quiet, the call ends on both sides.
+function startHeartbeat() {
+  clearInterval(call.hbTimer);
+  clearInterval(call.hbWatch);
+  call.lastHb = Date.now();
+  call.hbTimer = setInterval(() => { if (call.state === "active") sendLive("hb"); }, 4000);
+  call.hbWatch = setInterval(() => {
+    if (call.state === "active" && Date.now() - call.lastHb > 20000) endCall("Connection lost", true);
+  }, 3000);
+}
+
+// Voice to video: the other person must agree.
+function toggleMode() {
+  if (call.state !== "active") return;
+  if (call.video) switchMode(false, true);
+  else requestVideo();
+}
+
+async function requestVideo() {
+  const ok = await micCamProbe(true);
+  if (!ok) return uiAlert("Camera blocked", "Allow the camera for this app in your phone's settings.");
+  sendSig("vidreq");
+  logSys("ASKED PARTNER TO START VIDEO.");
+}
+
+async function askVideo() {
+  if (call.state !== "active" || call.video) return;
+  const ok = await micCamProbe(true);
+  if (call.state !== "active") return;
+  if (!ok) { sendSig("vidno"); return; }
+  const yes = await uiConfirm("Switch to video?", "Your partner wants to start video.", "Accept");
+  if (call.state !== "active") return;
+  if (yes) { sendSig("vidyes"); await switchMode(true, false); }
+  else sendSig("vidno");
+}
+
+async function switchMode(video, notify) {
+  if (call.state !== "active") return;
+  if (video) {
+    const ok = await micCamProbe(true);
+    if (!ok) return uiAlert("Camera blocked", "Allow the camera for this app in your phone's settings.");
+  }
+  call.video = !!video;
+  if (call.video) call.camOn = true;
+  if (notify) sendSig("mode", { video: call.video });
+  loadFrame();
+  callUI();
+}
+
 function endCall(reason, notify) {
   if (call.state === "idle") return;
   const dur = call.state === "active" && call.joined ? fmtTime(Date.now() - call.t0) : "";
   const kind = call.video ? "Video call" : "Voice call";
-  if (notify) sendCtl({ op: "call", k: call.state === "ringing" ? "decline" : "end" });
+  if (notify) sendSig(call.state === "ringing" ? "decline" : "end");
   clearTimeout(call.timer);
   clearInterval(call.tick);
-  closeVdo();
-  Object.assign(call, { state: "idle", room: "", pw: "", joined: false, t0: 0 });
+  clearInterval(call.hbTimer);
+  clearInterval(call.hbWatch);
+  closeFrame();
+  Object.assign(call, { state: "idle", room: "", pw: "", joined: false, t0: 0, video: false, facing: "front" });
   callUI();
   if (dur) logSys(kind + " · " + dur);
   else if (reason) logSys(reason.toUpperCase());
@@ -1220,27 +1341,36 @@ function endCall(reason, notify) {
 
 async function handleCallSignal(o) {
   try {
+    if (o.k === "invite") {
+      if (call.state !== "idle") { sendCtl({ op: "call", k: "busy" }); return; }
+      const ok = (s) => typeof s === "string" && /^[A-Za-z0-9_-]{6,64}$/.test(s);
+      if (!ok(o.room) || !ok(o.pw)) return;
+      Object.assign(call, {
+        state: "ringing", video: !!o.video, facing: "front", room: o.room, pw: o.pw,
+        joined: false, micOn: true, camOn: true, spkOn: true
+      });
+      callUI();
+      call.timer = setTimeout(() => { if (call.state === "ringing") endCall("Missed call", false); }, 45000);
+      return;
+    }
+    if (o.k === "hb") {
+      if (call.state === "active" && o.room === call.room) call.lastHb = Date.now();
+      return;
+    }
+    if (call.room && o.room && o.room !== call.room) return;   // a signal from an earlier call
     switch (o.k) {
-      case "invite": {
-        if (call.state !== "idle") { sendCtl({ op: "call", k: "busy" }); return; }
-        const ok = (s) => typeof s === "string" && /^[A-Za-z0-9_-]{6,64}$/.test(s);
-        if (!ok(o.room) || !ok(o.pw)) return;
-        Object.assign(call, {
-          state: "ringing", video: !!o.video, room: o.room, pw: o.pw,
-          joined: false, micOn: true, camOn: true, spkOn: true
-        });
-        callUI();
-        call.timer = setTimeout(() => { if (call.state === "ringing") endCall("Missed call", false); }, 45000);
-        break;
-      }
       case "accept":
         if (call.state !== "calling") return;
         clearTimeout(call.timer);
-        openVdo();
+        openCall();
         break;
       case "decline": if (call.state === "calling") endCall("Call declined", false); break;
       case "busy": if (call.state === "calling") endCall("Peer is busy", false); break;
       case "end": endCall(call.state === "ringing" ? "Missed call" : "Call ended", false); break;
+      case "mode": if (call.state === "active") await switchMode(!!o.video, false); break;
+      case "vidreq": await askVideo(); break;
+      case "vidyes": if (call.state === "active" && !call.video) await switchMode(true, false); break;
+      case "vidno": if (call.state === "active") logSys("PARTNER DECLINED VIDEO."); break;
     }
   } catch (e) {
     endCall("Call error", true);
