@@ -289,3 +289,81 @@ input, textarea {
   font-size: 11px;
 }
 .voice-note { display: block; width: 220px; max-width: 100%; height: 36px; }
+
+/* ---------- Call screen (VDO.Ninja) ---------- */
+.cs-root {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: #05070a;
+  display: none;
+  flex-direction: column;
+}
+#cs-frame-slot { position: absolute; inset: 0; z-index: 1; }
+#cs-frame-slot #vdo-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #05070a; }
+.cs-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #05070a;
+}
+.cs-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 48px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cs-name { font-size: 24px; font-weight: 600; color: var(--text-main); }
+.cs-status { font-size: 14px; color: var(--text-dim); }
+.cs-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 3;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
+}
+.cs-top-name { font-size: 17px; font-weight: 600; color: #fff; }
+.cs-top-status { font-size: 13px; color: #e5e7eb; font-family: monospace; margin-top: 2px; }
+.cs-bar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+}
+.cs-btn {
+  min-width: 74px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+  background: rgba(28, 32, 42, 0.92);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.cs-btn.off { background: #ef4444; border-color: #ef4444; }
+.cs-btn.cs-accept { background: #22c55e; border-color: #22c55e; color: #06210f; }
+.cs-btn.cs-end { background: #ef4444; border-color: #ef4444; display: flex; }
