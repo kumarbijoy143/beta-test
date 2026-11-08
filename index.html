@@ -11,9 +11,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <!-- Modular Styles -->
-  <link rel="stylesheet" href="css/theme.css?v=6">
-  <link rel="stylesheet" href="css/layout.css?v=6">
-  <link rel="stylesheet" href="css/extra.css?v=6">
+  <link rel="stylesheet" href="css/theme.css?v=7">
+  <link rel="stylesheet" href="css/layout.css?v=7">
+  <link rel="stylesheet" href="css/extra.css?v=7">
 </head>
 <body>
 
@@ -144,14 +144,15 @@
     <div class="cs-top-status" id="top-status"></div>
   </div>
   <div class="cs-bar">
-    <button class="cs-btn" id="call-mic-btn" onclick="toggleCallMic()">Mute</button>
-    <button class="cs-btn" id="call-cam-btn" onclick="toggleCallCam()">Camera</button>
-    <button class="cs-btn" id="call-spk-btn" onclick="toggleCallSpk()">Speaker</button>
-    <button class="cs-btn cs-accept" id="call-accept" onclick="acceptCall()">Accept</button>
-    <button class="cs-btn cs-end" id="call-end" onclick="hangUp()">End</button>
+    <button class="cs-ico" id="call-mic-btn" onclick="toggleCallMic()"></button>
+    <button class="cs-ico" id="call-cam-btn" onclick="toggleCallCam()"></button>
+    <button class="cs-ico" id="call-flip-btn" title="Flip camera" onclick="flipCamera()"></button>
+    <button class="cs-ico" id="call-spk-btn" onclick="toggleCallSpk()"></button>
+    <button class="cs-ico" id="call-mode-btn" onclick="toggleMode()"></button>
+    <button class="cs-ico cs-accept" id="call-accept" title="Accept" onclick="acceptCall()"></button>
+    <button class="cs-ico cs-end" id="call-end" onclick="hangUp()"></button>
   </div>
 </div>
-
 <!-- Native Settings Screen -->
 <div id="settings-screen">
   <div class="settings-nav">
@@ -286,9 +287,9 @@
 </div>
 
 <!-- Modular Scripts -->
-<script src="js/config.js?v=6"></script>
-<script src="js/app.js?v=6"></script>
-<script src="js/transport.js?v=6"></script>
+<script src="js/config.js?v=7"></script>
+<script src="js/app.js?v=7"></script>
+<script src="js/transport.js?v=7"></script>
 
 </body>
 </html>
