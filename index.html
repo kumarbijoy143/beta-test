@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <title>Terminal Console</title>
 
-  <!-- External Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/piesocket-js@4/dist/piesocket.js"></script>
+  <!-- External Libraries (pinned to the exact version in use) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <!-- Modular Styles -->
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/theme.css?v=5">
+  <link rel="stylesheet" href="css/layout.css?v=5">
+  <link rel="stylesheet" href="css/extra.css?v=5">
 </head>
 <body>
 
@@ -23,30 +25,10 @@
       </div>
       <div class="header-info">
         <div class="header-title" id="conn-state">CONNECTING...</div>
-        <div class="header-sub">AES-256-CBC | ZERO LOGS</div>
+        <div class="header-sub">E2E ENCRYPTED</div>
       </div>
     </div>
     <div class="header-actions">
-      <!-- PUBG Style Speaker Mute/Unmute -->
-      <button class="action-btn" id="speaker-toggle-btn" title="Speaker On/Off" onclick="toggleSpeaker()">
-        <svg viewBox="0 0 24 24">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        </svg>
-      </button>
-
-      <!-- PUBG Style Live Mic Push/Toggle -->
-      <button class="action-btn" id="mic-toggle-btn" title="Mic On/Off" onclick="toggleMic()">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
-        </svg>
-      </button>
-
-      <!-- Video Call Screen Hand-off -->
       <button class="action-btn" title="Video Call" onclick="triggerCallHandOff(true)">
         <svg viewBox="0 0 24 24">
           <rect x="2" y="5" width="13" height="14" rx="3"></rect>
@@ -54,14 +36,12 @@
         </svg>
       </button>
 
-      <!-- Voice Call Screen Hand-off -->
       <button class="action-btn" title="Voice Call" onclick="triggerCallHandOff(false)">
         <svg viewBox="0 0 24 24">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
         </svg>
       </button>
 
-      <!-- Stealth Panic Lock -->
       <button class="action-btn" title="Panic Lock" onclick="panicExit()">
         <svg viewBox="0 0 24 24">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -69,7 +49,6 @@
         </svg>
       </button>
 
-      <!-- Settings Menu -->
       <button class="action-btn" title="Settings" onclick="openSettings()">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="5" r="1.5" fill="#ffffff" stroke="none"></circle>
@@ -80,31 +59,34 @@
     </div>
   </header>
 
+  <!-- Selected message: action bar -->
+  <div id="select-bar">
+    <button class="sel-btn" title="Close" onclick="hideContext()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="sel-spacer"></div>
+    <button class="sel-btn" title="Reply" onclick="triggerContextAction('reply')">
+      <svg viewBox="0 0 24 24"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+    </button>
+    <button class="sel-btn" title="Copy" onclick="triggerContextAction('copy')">
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </button>
+    <button class="sel-btn" id="select-edit" title="Edit" onclick="triggerContextAction('edit')">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+  </div>
+
+  <!-- Selected message: reactions -->
+  <div id="reaction-dock">
+    <span class="reaction-emoji" onclick="selectReaction('👍')">👍</span>
+    <span class="reaction-emoji" onclick="selectReaction('❤️')">❤️</span>
+    <span class="reaction-emoji" onclick="selectReaction('😂')">😂</span>
+    <span class="reaction-emoji" onclick="selectReaction('😮')">😮</span>
+    <span class="reaction-emoji" onclick="selectReaction('😢')">😢</span>
+    <span class="reaction-emoji" onclick="selectReaction('🙏')">🙏</span>
+  </div>
+
   <div id="chat-stream">
-    <!-- Floating Emoji Reaction Dock -->
-    <div id="reaction-dock">
-      <span class="reaction-emoji" onclick="selectReaction('👍')">👍</span>
-      <span class="reaction-emoji" onclick="selectReaction('❤️')">❤️</span>
-      <span class="reaction-emoji" onclick="selectReaction('😂')">😂</span>
-      <span class="reaction-emoji" onclick="selectReaction('😮')">😮</span>
-      <span class="reaction-emoji" onclick="selectReaction('😢')">😢</span>
-      <span class="reaction-emoji" onclick="selectReaction('🙏')">🙏</span>
-    </div>
-
-    <!-- WhatsApp Context Action Dropdown Menu -->
-    <div id="msg-context-menu">
-      <div class="context-item" onclick="triggerContextAction('reply')">
-        <span>↩️</span><span>Reply</span>
-      </div>
-      <div class="context-item" onclick="triggerContextAction('copy')">
-        <span>📋</span><span>Copy Text</span>
-      </div>
-      <div class="context-item" id="context-edit-item" onclick="triggerContextAction('edit')">
-        <span>✏️</span><span>Edit Message</span>
-      </div>
-    </div>
-
-    <!-- Bouncing WhatsApp 3-Dots Typing Indicator -->
     <div class="typing-bubble-wrap" id="typing-indicator">
       <div class="typing-bubble">
         <div class="typing-dot"></div>
@@ -114,7 +96,6 @@
     </div>
   </div>
 
-  <!-- Docked Quoted Reply / Edit Banner -->
   <div id="reply-preview-bar">
     <div class="reply-preview-content">
       <span class="reply-preview-title" id="reply-target-title">Replying to message</span>
@@ -123,7 +104,6 @@
     <button class="reply-cancel-btn" onclick="cancelReplyOrEdit()">✕</button>
   </div>
 
-  <!-- Expanding Bottom Input Bar -->
   <footer id="input-bar">
     <div class="input-pill">
       <button class="smiley-btn" type="button" onclick="triggerNativeEmojiKeyboard()">
@@ -142,7 +122,8 @@
       </button>
       <input type="file" id="file-picker" style="display: none;" onchange="handleFileSelected(event)">
     </div>
-    <button class="send-circle-btn" id="send-btn" onpointerdown="event.preventDefault();" onclick="sendMessage()">
+    <button class="voice-btn" id="voice-btn" type="button" onpointerdown="voiceDown(event)" onpointermove="voiceMove(event)" onpointerup="voiceUp()" onpointercancel="voiceUp()" oncontextmenu="return false;" title="Hold to record"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+    <button class="send-circle-btn" id="send-btn" style="display:none" onpointerdown="event.preventDefault();" onclick="sendMessage()">
       <svg viewBox="0 0 24 24">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
       </svg>
@@ -158,36 +139,6 @@
   </div>
 
   <div class="settings-body">
-    <!-- PRODUCT KEY & OFFLINE VAULT CARD -->
-    <div class="section-label">RELAY & OFFLINE VAULT (BYOK)</div>
-    <div class="os-card">
-      <div class="os-row" onclick="configureRelayKey()">
-        <svg class="row-icon-svg" viewBox="0 0 24 24">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <div class="row-content">
-          <div class="row-title">Relay Product Key</div>
-          <div class="row-subtitle" id="current-relay-label">Not Configured</div>
-        </div>
-        <div class="row-arrow">›</div>
-      </div>
-
-      <div class="os-row" onclick="configureVaultUrl()">
-        <svg class="row-icon-svg" viewBox="0 0 24 24">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        <div class="row-content">
-          <div class="row-title">Offline Vault URL</div>
-          <div class="row-subtitle" id="current-vault-label">Not Configured</div>
-        </div>
-        <div class="row-arrow">›</div>
-      </div>
-    </div>
-
-    <!-- APPEARANCE & THEME CARD -->
     <div class="section-label">APPEARANCE & THEME</div>
     <div class="os-card">
       <div class="os-row" onclick="openDialog('theme')">
@@ -231,7 +182,6 @@
       </div>
     </div>
 
-    <!-- PRIVACY & DISAPPEARING MESSAGES CARD -->
     <div class="section-label">PRIVACY & LIFESPAN</div>
     <div class="os-card">
       <div class="os-row" onclick="toggleDisappearingSetting(true)">
@@ -264,7 +214,6 @@
       </div>
     </div>
 
-    <!-- MAINTENANCE & PURGE -->
     <div class="section-label">MAINTENANCE & PURGE</div>
     <div class="os-card">
       <div class="os-row" onclick="purgeBothScreens()">
@@ -301,8 +250,9 @@
 </div>
 
 <!-- Modular Scripts -->
-<script src="js/config.js"></script>
-<script src="js/app.js"></script>
+<script src="js/config.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
+<script src="js/transport.js?v=5"></script>
 
 </body>
 </html>
